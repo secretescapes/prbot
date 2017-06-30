@@ -97,7 +97,12 @@ module.exports = function (robot) {
             reviewer: user,
           };
         }));
+
+        res.writeHead(200);
+        res.end();
       });
+
+      // TODO errors
     }
   });
 };
