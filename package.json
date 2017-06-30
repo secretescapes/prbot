@@ -5,6 +5,7 @@
   "author": "Josh Prendergast <josh.prendergast@secretescapes.com>",
   "description": "Pull request bot",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "coffee-script": "^1.12.6",
     "github": "^9.2.0",
     "handlebars": "^4.0.10",

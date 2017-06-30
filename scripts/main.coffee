@@ -1,7 +1,14 @@
 handlebars = require('handlebars')
 GitHubApi = require('github')
+bluebird = require('bluebird')
 
-gh = new GitHubApi()
+gh = new GitHubApi({
+  debug: false,
+  protocol: 'https',
+  host: 'api.github.com',
+  Promise: bluebird,
+  timeout: 5000,
+})
 
 # Templates
 tableRow = handlebars.compile('<{{ pr.html_url }}|{{ pr.head.label }}> ' +
