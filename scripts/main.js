@@ -24,14 +24,13 @@ let gh = new GitHubApi({
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
 
-
 mongoose.connect(config.MONGODB_URI);
+
 let Review = mongoose.model('Review', {
   reward: {type: Number},
   reviewee: {type: String},
   reviewer: {type: String},
 });
-
 
 // Program
 module.exports = function (robot) {
@@ -84,13 +83,14 @@ module.exports = function (robot) {
         per_page: 100, // TODO Pagination
       }).then(function (resp) {
         var reward = getReward(payload.pull_request);
-        var people = _.uniq(_.map(resp.data, 'user.login'));
+        var users = _.uniq(_.map(resp.data, 'user.login'));
 
-        people.forEach(function (user) {
-          let r = new Review();
-          r.reward = reward;
-          r.reviewee = payload.pull_request.user.login;
-          r.reviewer = user;
+        Review.insertMany(_.map(users, function (user) {
+          return {
+            reward: reward,
+            reviewee: payload.pull_request.user.login,
+            reviewer: user,
+          };
         });
       });
     }
