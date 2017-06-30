@@ -45,4 +45,5 @@ module.exports = (robot) ->
     })
 
     res.reply 'hello'
+    res.reply prs
     res.reply (tableRow(pr) for pr in prs).join('\n')
