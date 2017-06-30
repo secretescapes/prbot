@@ -11,7 +11,8 @@ gh = new GitHubApi({
 })
 
 # Templates
-tableRow = handlebars.compile('<{{ html_url }}|{{ title }}>')
+tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
+  '{{ author.login }}, reward: {{ reward }}]>')
 
 # Configuration
 config = {
@@ -28,6 +29,9 @@ module.exports = (robot) ->
       token: config.GH_TOKEN,
     })
 
+  reward = (pr) ->
+    100
+
   robot.hear /I want a PR for (\d+)/i, (res) ->
     # TODO
 
@@ -42,5 +46,11 @@ module.exports = (robot) ->
       direction: 'desc',
       per_page: 10,
     }).then((resp) ->
-      res.reply (tableRow(pr) for pr in resp.data).join('\n')
+      output = ''
+      for pr in resp.data
+        do (pr) ->
+          pr.reward = reward(pr)
+          output += tableRow(pr) + '\n'
+
+      robot.reply output
     )
