@@ -25,7 +25,7 @@ let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
 
 
-mongoose.connect(config.MONGODB_URL);
+mongoose.connect(config.MONGODB_URI);
 let Review = mongoose.model('Review', {
   reward: {type: Number},
   reviewee: {type: String},
