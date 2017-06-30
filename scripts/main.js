@@ -41,7 +41,6 @@ module.exports = function (robot) {
   });
 
   robot.hear(/what PRs need review/i, function(res) {
-    // TODO Use pagination to find all PRs
     authenticate();
     gh.pullRequests.getAll({
       repo: config.REPO_NAME,
@@ -52,7 +51,7 @@ module.exports = function (robot) {
       per_page: 10,
     }).then(function(resp) {
       let output = '';
-      resp.data.each(function(pr) {
+      resp.data.forEach(function(pr) {
           pr.reward = reward(pr);
           output += tableRow(pr) + '\n';
       });
