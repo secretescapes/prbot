@@ -1,10 +1,10 @@
 'use strict';
 
-var handlebars = require('handlebars');
-var GitHubApi = require('github');
-var bluebird = require('bluebird');
+let handlebars = require('handlebars');
+let GitHubApi = require('github');
+let bluebird = require('bluebird');
 
-var gh = new GitHubApi({
+let gh = new GitHubApi({
   debug: false,
   protocol: 'https',
   host: 'api.github.com',
@@ -13,11 +13,11 @@ var gh = new GitHubApi({
 });
 
 // Templates
-var tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
+let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
   '{{ author.login }}, reward: {{ reward }}]>');
 
 // Configuration
-var config = {
+let config = {
   GH_TOKEN: process.env.GH_TOKEN,
   REPO_NAME: process.env.REPO_NAME,
   REPO_OWNER: process.env.REPO_OWNER,
@@ -36,13 +36,13 @@ module.exports = function(robot) {
     return 100;
   };
 
-  robot.hear(/I want a PR for (\d+)/i, function (res) {
+  robot.hear(/I want a PR for (\d+)/i, function(res) {
     // TODO
   });
 
-  robot.hear(/what PRs need review/i, function (res) {
+  robot.hear(/what PRs need review/i, function(res) {
     // TODO Use pagination to find all PRs
-    authenticate()
+    authenticate();
     gh.pullRequests.getAll({
       repo: config.REPO_NAME,
       owner: config.REPO_OWNER,
@@ -50,13 +50,13 @@ module.exports = function(robot) {
       sort: 'long-running',
       direction: 'desc',
       per_page: 10,
-    }).then(function (resp) {
-      var output = '';
-      resp.data.each(function (pr) {
-          pr.reward = reward(pr)
-          output += tableRow(pr) + '\n'
+    }).then(function(resp) {
+      let output = '';
+      resp.data.each(function(pr) {
+          pr.reward = reward(pr);
+          output += tableRow(pr) + '\n';
       });
-      robot.reply(output)
+      robot.reply(output);
     });
-  }
-}
+  });
+};
