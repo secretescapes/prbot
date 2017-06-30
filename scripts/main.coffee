@@ -13,13 +13,13 @@ config = {
 }
 
 # Program
-authenticate = ->
-  gh.authenticate({
-    type: 'oauth',
-    token: config.GH_TOKEN,
-  })
-
 module.exports = (robot) ->
+  authenticate = ->
+    gh.authenticate({
+      type: 'oauth',
+      token: config.GH_TOKEN,
+    })
+
   robot.hear /I want a PR for (\d+)/i, (res) ->
     # TODO
 
