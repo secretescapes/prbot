@@ -35,15 +35,14 @@ module.exports = (robot) ->
   robot.hear /what PRs need review/i, (res) ->
     # TODO Use pagination to find all PRs
     authenticate()
-    prs = gh.pullRequests.getAll({
+    gh.pullRequests.getAll({
       repo: config.REPO_NAME,
       owner: config.REPO_OWNER,
       state: 'open',
       sort: 'long-running',
       direction: 'desc',
       per_page: 100,
-    })
-
-    res.reply 'hello'
-    res.reply prs
-    res.reply (tableRow(pr) for pr in prs).join('\n')
+    }).then((prs) ->
+      res.reply prs
+      res.reply (tableRow(pr) for pr in prs).join('\n')
+    )
