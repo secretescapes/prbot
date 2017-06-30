@@ -6,6 +6,7 @@
   "description": "Pull request bot",
   "dependencies": {
     "coffee-script": "^1.12.6",
+    "github": "^9.2.0",
     "handlebars": "^4.0.10",
     "hubot": "^2.19.0",
     "hubot-diagnostics": "0.0.2",
@@ -19,8 +20,7 @@
     "hubot-rules": "^0.1.2",
     "hubot-scripts": "^2.17.2",
     "hubot-shipit": "^0.2.1",
-    "hubot-slack": "^4.3.4",
-    "node-github": "0.0.3"
+    "hubot-slack": "^4.3.4"
   },
   "engines": {
     "node": "0.10.x"
