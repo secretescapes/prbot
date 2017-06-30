@@ -82,7 +82,7 @@ module.exports = function (robot) {
       gh.pullRequests.getReviews({
         repo: config.REPO_NAME,
         owner: config.REPO_OWNER,
-        number: payload.pull_request.id,
+        number: payload.pull_request.number,
         per_page: 100, // TODO Pagination
       }).then(function (resp) {
         console.log('got reviews');
