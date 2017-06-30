@@ -67,7 +67,7 @@ module.exports = function (robot) {
     });
   });
 
-  robot.router.get("/github-hook", function (req, res) {
+  robot.router.post("/github-hook", function (req, res) {
     let payload = req.body.payload;
     if (payload.organization != config.REPO_OWNER || payload.repository != config.REPO_NAME) {
       return; // Ignore
