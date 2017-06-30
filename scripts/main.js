@@ -21,6 +21,8 @@ let gh = new GitHubApi({
   timeout: 5000,
 });
 
+console.log(config);
+
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
 
@@ -84,6 +86,7 @@ module.exports = function (robot) {
       }).then(function (resp) {
         var reward = getReward(payload.pull_request);
         var users = _.uniq(_.map(resp.data, 'user.login'));
+        console.log('foo');
 
         Review.insertMany(_.map(users, function (user) {
           return {
