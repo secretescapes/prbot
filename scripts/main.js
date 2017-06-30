@@ -1,5 +1,14 @@
 'use strict';
 
+// TODO Convert GitHub users to Slack users
+// TODO Show user how much money they have
+// TODO Calcuate dynamic reward value
+// TODO Allow reviewee to set additional bounty
+// TODO Make the regexes accept natural language
+// TODO Leaderboard
+// TODO Print summary / leaderboard every Friday
+// TODO Print who is reviewing what in the list
+
 let handlebars = require('handlebars');
 let GitHubApi = require('github');
 let bluebird = require('bluebird');
@@ -45,10 +54,6 @@ module.exports = function (robot) {
     return 100;
   };
 
-  robot.hear(/I want a PR for (\d+)/i, function (res) {
-    // TODO
-  });
-
   robot.hear(/what PRs need review/i, function (res) {
     authenticate();
 
@@ -69,40 +74,34 @@ module.exports = function (robot) {
 
   robot.router.post("/github-hook", function (req, res) {
     let payload = req.body;
-    console.log(payload);
     if (/*payload.organization != config.REPO_OWNER || */payload.repository.name != config.REPO_NAME) {
-      return; // Ignore
+      res.writeHead(400);
+    } else {
+      res.writeHead(202);
+
+      if (payload.action === 'closed' && payload.pull_request.merged) {
+        authenticate();
+
+        gh.pullRequests.getReviews({
+          repo: config.REPO_NAME,
+          owner: config.REPO_OWNER,
+          number: payload.pull_request.number,
+          per_page: 100, // TODO Pagination
+        }).then(function (resp) {
+          var reward = getReward(payload.pull_request);
+          console.log('foo');
+
+          Review.insertMany(_.map(users, function (user) {
+            // TODO reviewee != reviewer
+            return {
+              reward: reward,
+              reviewee: payload.pull_request.user.login,
+              reviewer: user,
+            };
+          }));
+        });
+      }
     }
-    console.log('its valid');
-
-    if (payload.action === 'closed' && payload.pull_request.merged) {
-      authenticate();
-
-      console.log('getting reviews');
-      gh.pullRequests.getReviews({
-        repo: config.REPO_NAME,
-        owner: config.REPO_OWNER,
-        number: payload.pull_request.number,
-        per_page: 100, // TODO Pagination
-      }).then(function (resp) {
-        console.log('got reviews');
-        var reward = getReward(payload.pull_request);
-        var users = _.uniq(_.map(resp.data, 'user.login'));
-        console.log('foo');
-
-        Review.insertMany(_.map(users, function (user) {
-          return {
-            reward: reward,
-            reviewee: payload.pull_request.user.login,
-            reviewer: user,
-          };
-        }));
-
-        res.writeHead(200);
-        res.end();
-      });
-
-      // TODO errors
-    }
+    res.end();
   });
 };
