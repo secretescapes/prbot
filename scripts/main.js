@@ -24,13 +24,14 @@ let gh = new GitHubApi({
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
 
+
+mongoose.connect(config.MONGODB_URL);
 let Review = mongoose.model('Review', {
   reward: {type: Number},
   reviewee: {type: String},
   reviewer: {type: String},
 });
 
-mongoose.connect(config.MONGODB_URL);
 
 // Program
 module.exports = function (robot) {
