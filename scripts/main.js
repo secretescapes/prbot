@@ -75,7 +75,7 @@ module.exports = function (robot) {
     }
     console.log('its valid');
 
-    if (payload.action === 'closed' && payload.merged) {
+    if (payload.action === 'closed' && payload.pull_request.merged) {
       authenticate();
 
       console.log('getting reviews');
