@@ -42,7 +42,6 @@ module.exports = (robot) ->
       sort: 'long-running',
       direction: 'desc',
       per_page: 100,
-    }).then((prs) ->
-      res.reply JSON.stringify(prs)
-      res.reply (tableRow(pr) for pr in prs).join('\n')
+    }).then((resp) ->
+      res.reply (tableRow(pr) for pr in resp.data).join('\n')
     )
