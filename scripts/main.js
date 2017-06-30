@@ -6,6 +6,13 @@ let bluebird = require('bluebird');
 let mongoose = require('mongoose');
 let _ = require('lodash');
 
+let config = {
+  GH_TOKEN: process.env.GH_TOKEN,
+  REPO_NAME: process.env.REPO_NAME,
+  REPO_OWNER: process.env.REPO_OWNER,
+  MONGODB_URI: process.env.MONGODB_URI,
+};
+
 let gh = new GitHubApi({
   debug: false,
   protocol: 'https',
@@ -14,22 +21,16 @@ let gh = new GitHubApi({
   timeout: 5000,
 });
 
-// Templates
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
-
-// Configuration
-let config = {
-  GH_TOKEN: process.env.GH_TOKEN,
-  REPO_NAME: process.env.REPO_NAME,
-  REPO_OWNER: process.env.REPO_OWNER,
-};
 
 let Review = mongoose.model('Review', {
   reward: {type: Number},
   reviewee: {type: String},
   reviewer: {type: String},
 });
+
+mongoose.connect(config.MONGODB_URL);
 
 // Program
 module.exports = function (robot) {
