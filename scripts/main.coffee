@@ -41,7 +41,8 @@ module.exports = (robot) ->
       state: 'open',
       sort: 'long-running',
       direction: 'desc',
-      per_page: 100,
+      per_page: 10,
     }).then((resp) ->
+      res.reply Object.keys(resp.data)
       res.reply (tableRow(pr) for pr in resp.data).join('\n')
     )
