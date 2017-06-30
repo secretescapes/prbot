@@ -21,8 +21,6 @@ let gh = new GitHubApi({
   timeout: 5000,
 });
 
-console.log(config);
-
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
     '{{ user.login }}, reward: {{ reward }}]>');
 
@@ -71,19 +69,23 @@ module.exports = function (robot) {
 
   robot.router.post("/github-hook", function (req, res) {
     let payload = req.body;
+    console.log(payload);
     if (payload.organization != config.REPO_OWNER || payload.repository != config.REPO_NAME) {
       return; // Ignore
     }
+    console.log('its valid');
 
     if (payload.action === 'closed' && payload.merged) {
       authenticate();
 
+      console.log('getting reviews');
       gh.pullRequests.getReviews({
         repo: config.REPO_NAME,
         owner: config.REPO_OWNER,
         number: payload.pull_request.id,
         per_page: 100, // TODO Pagination
       }).then(function (resp) {
+        console.log('got reviews');
         var reward = getReward(payload.pull_request);
         var users = _.uniq(_.map(resp.data, 'user.login'));
         console.log('foo');
