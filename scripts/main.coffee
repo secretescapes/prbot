@@ -11,8 +11,7 @@ gh = new GitHubApi({
 })
 
 # Templates
-tableRow = handlebars.compile('<{{ pr.html_url }}|{{ pr.head.label }}> ' +
-                              '(+{{ pr.additions }} / -{{ pr.deletions }})')
+tableRow = handlebars.compile('<{{ html_url }}|{{ title }}>')
 
 # Configuration
 config = {
@@ -43,6 +42,5 @@ module.exports = (robot) ->
       direction: 'desc',
       per_page: 10,
     }).then((resp) ->
-      res.reply Object.keys(resp.data[0])
       res.reply (tableRow(pr) for pr in resp.data).join('\n')
     )
