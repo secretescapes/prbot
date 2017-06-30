@@ -43,6 +43,6 @@ module.exports = (robot) ->
       direction: 'desc',
       per_page: 100,
     }).then((prs) ->
-      res.reply prs
+      res.reply JSON.stringify(prs)
       res.reply (tableRow(pr) for pr in prs).join('\n')
     )
