@@ -1,8 +1,8 @@
-handlebars = require('handlebars')
+mustache = require('mustache')
 gh = require('node-github')
 
 # Templates
-tableRow = handlebars.compile('<{{ pr.html_url }}|{{ pr.head.label }}> ' +
+tableRow = mustache.compile('<{{ pr.html_url }}|{{ pr.head.label }}> ' +
                               '(+{{ pr.additions }} / -{{ pr.deletions }})')
 
 # Configuration
