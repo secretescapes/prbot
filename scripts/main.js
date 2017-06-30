@@ -24,7 +24,7 @@ let config = {
 };
 
 // Program
-module.exports = function(robot) {
+module.exports = function (robot) {
   authenticate = function() {
     gh.authenticate({
       type: 'oauth',
