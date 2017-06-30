@@ -25,14 +25,14 @@ let config = {
 
 // Program
 module.exports = function (robot) {
-  authenticate = function() {
+  let authenticate = function() {
     gh.authenticate({
       type: 'oauth',
       token: config.GH_TOKEN,
     });
   };
 
-  reward = function(pr) {
+  let reward = function(pr) {
     return 100;
   };
 
