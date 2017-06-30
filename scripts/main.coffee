@@ -1,5 +1,7 @@
 handlebars = require('handlebars')
-gh = require('node-github')
+GitHubApi = require('github')
+
+gh = new GitHubApi()
 
 # Templates
 tableRow = handlebars.compile('<{{ pr.html_url }}|{{ pr.head.label }}> ' +
