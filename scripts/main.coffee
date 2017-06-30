@@ -44,4 +44,5 @@ module.exports = (robot) ->
       per_page: 100,
     })
 
+    res.reply 'hello'
     res.reply (tableRow(pr) for pr in prs).join('\n')
