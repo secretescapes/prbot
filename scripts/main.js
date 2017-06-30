@@ -91,7 +91,7 @@ module.exports = function (robot) {
             reviewee: payload.pull_request.user.login,
             reviewer: user,
           };
-        });
+        }));
       });
     }
   });
