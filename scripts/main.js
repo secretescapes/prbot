@@ -36,17 +36,19 @@ let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
 
 mongoose.connect(config.MONGODB_URI);
 
-let Person = mongoose.model('Person', new mongoose.Schema({
+let PersonSchema = new mongoose.Schema({
   reward: Number,
   role: String,
   username: String
-}));
-
-let PullRequest = mongoose.model('PullRequest',new mongoose.Schema({
+});
+let PullRequestSchema = new mongoose.Schema({
   pr_number: Number,
   pr_title: String,
-  people: [Person]
-}));
+  people: [PersonSchema]
+});
+
+let Person = mongoose.model('Person', PersonSchema);
+let PullRequest = mongoose.model('PullRequest', PullRequestSchema);
 
 // Program
 module.exports = function (robot) {
