@@ -32,15 +32,21 @@ let gh = new GitHubApi({
 });
 
 let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
-    '{{ user.login }}, reward: {{ reward }}]>');
+  '{{ user.login }}, reward: {{ reward }}]>');
 
 mongoose.connect(config.MONGODB_URI);
 
-let Review = mongoose.model('Review', {
-  reward: {type: Number},
-  reviewee: {type: String},
-  reviewer: {type: String},
-});
+let Person = mongoose.model('Person', new mongoose.Schema({
+  reward: Number,
+  role: String,
+  username: String
+}));
+
+let PullRequest = mongoose.model('PullRequest',new mongoose.Schema({
+  pr_number: Number,
+  pr_title: String,
+  people: [Person]
+}));
 
 // Program
 module.exports = function (robot) {
@@ -54,6 +60,11 @@ module.exports = function (robot) {
   let getReward = function(pr) {
     return 100;
   };
+
+  robot.hear(/scoreboard/i, function(res) {
+    Review.aggregate([])
+  });
+
 
   robot.hear(/what PRs need review/i, function (res) {
     authenticate();
@@ -95,19 +106,21 @@ module.exports = function (robot) {
     }
     res.end();
   });
-  function rewardReviewers (pullRequest, reviewers) {
-  robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
-  var reward = getReward(pullRequest);
 
-  Review.insertMany(_.map(reviewers, function (reviewer) {
-    // TODO reviewee != reviewer
-    return {
-      reward: reward,
-      reviewee: pullRequest.user.login,
-      reviewer: reviewer,
-    };
-  }));
-}
+  function rewardReviewers (pullRequest, reviewers) {
+    robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
+    var reward = getReward(pullRequest);
+
+    let pr = new PullRequest();
+    pr.number = pullRequest.number;
+    pr.title = pullRequest.title;
+    pr.people = _.map(reviewers, function (reviewer) {
+      return new Person({username: reviewer, reward: reward, role: "REVIEWER"});
+    });
+    pr.people.push(new Person({username: pullRequest.user.login, reward: -reward, role: "OWNER"}));
+
+    pr.save();
+  }
 };
 
 
