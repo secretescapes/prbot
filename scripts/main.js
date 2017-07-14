@@ -66,7 +66,7 @@ module.exports = function (robot) {
   robot.hear(/scoreboard/i, function(res) {
     let cursor = PullRequest.aggregate([
       {$unwind: '$people'},
-      {$group: {_id: '$username', balance: {$sum: '$reward'}}},
+      {$group: {_id: '$people.username', balance: {$sum: '$people.reward'}}},
     ]).exec(function (_, scoreboard) {
       res.send(JSON.stringify(scoreboard));
     });
