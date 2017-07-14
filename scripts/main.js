@@ -64,11 +64,12 @@ module.exports = function (robot) {
   };
 
   robot.hear(/scoreboard/i, function(res) {
-    let scoreboard = PullRequest.aggregate([
+    PullRequest.aggregate([
       {$unwind: 'people'},
       {$group: {_id: 'username', balance: {$sum: 'reward'}}},
-    ]);
-    res.send(JSON.stringify(scoreboard));
+    ], function (_, scoreboard) {
+      res.send(JSON.stringify(scoreboard));
+    });
   });
 
 
