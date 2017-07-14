@@ -68,7 +68,7 @@ module.exports = function (robot) {
       {$unwind: 'people'},
       {$group: {_id: 'username', balance: {$sum: 'reward'}}},
     ]);
-    res.send(scoreboard);
+    res.send(JSON.stringify(scoreboard));
   });
 
 
