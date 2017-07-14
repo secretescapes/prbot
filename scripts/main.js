@@ -1,5 +1,6 @@
 'use strict';
 
+
 // TODO Convert GitHub users to Slack users
 // TODO Show user how much money they have
 // TODO Calcuate dynamic reward value
