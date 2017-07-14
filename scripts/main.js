@@ -84,6 +84,7 @@ module.exports = function (robot) {
         robot.log("PR closed")
         authenticate();
 
+
         gh.pullRequests.getReviews({
           repo: config.REPO_NAME,
           owner: config.REPO_OWNER,
