@@ -81,6 +81,7 @@ module.exports = function (robot) {
       res.writeHead(202);
 
       if (payload.action === 'closed' && payload.pull_request.merged) {
+        robot.log("PR closed")
         authenticate();
 
         gh.pullRequests.getReviews({
@@ -88,21 +89,24 @@ module.exports = function (robot) {
           owner: config.REPO_OWNER,
           number: payload.pull_request.number,
           per_page: 100, // TODO Pagination
-        }).then(function (resp) {
-          var reward = getReward(payload.pull_request);
-          console.log('foo');
-
-          Review.insertMany(_.map(users, function (user) {
-            // TODO reviewee != reviewer
-            return {
-              reward: reward,
-              reviewee: payload.pull_request.user.login,
-              reviewer: user,
-            };
-          }));
-        });
+        }).then(resp => rewardReviewers(payload.pull_request, _.uniq(_.map(resp.data, 'user.login'))));
       }
     }
     res.end();
   });
 };
+
+
+function rewardReviewers (pullRequest, reviewers) {
+  robot.log('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
+  var reward = getReward(pullRequest);
+
+  Review.insertMany(_.map(reviewers, function (reviewer) {
+    // TODO reviewee != reviewer
+    return {
+      reward: reward,
+      reviewee: pullRequest.user.login,
+      reviewer: reviewer,
+    };
+  }));
+}
