@@ -42,8 +42,8 @@ let PersonSchema = new mongoose.Schema({
   username: String
 });
 let PullRequestSchema = new mongoose.Schema({
-  pr_number: Number,
-  pr_title: String,
+  number: Number,
+  title: String,
   people: [PersonSchema]
 });
 
