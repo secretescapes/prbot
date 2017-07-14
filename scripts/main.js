@@ -81,7 +81,7 @@ module.exports = function (robot) {
       res.writeHead(202);
 
       if (payload.action === 'closed' && payload.pull_request.merged) {
-        robot.log("PR closed")
+        robot.logger.debug("PR closed")
         authenticate();
 
 
@@ -95,11 +95,8 @@ module.exports = function (robot) {
     }
     res.end();
   });
-};
-
-
-function rewardReviewers (pullRequest, reviewers) {
-  robot.log('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
+  function rewardReviewers (pullRequest, reviewers) {
+  robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
   var reward = getReward(pullRequest);
 
   Review.insertMany(_.map(reviewers, function (reviewer) {
@@ -111,3 +108,6 @@ function rewardReviewers (pullRequest, reviewers) {
     };
   }));
 }
+};
+
+
