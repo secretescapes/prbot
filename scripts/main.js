@@ -68,6 +68,7 @@ module.exports = function (robot) {
       {$unwind: '$people'},
       {$group: {_id: '$people.username', balance: {$sum: '$people.reward'}}},
       {$sort: {balance: -1}},
+      {$project: {username: '$_id', balance: 'balance'}},
     ]);
   };
 
@@ -118,10 +119,10 @@ module.exports = function (robot) {
 
   robot.hear(/scoreboard/i, function (res) {
     getScoreboard().exec(function (__, scoreboard) {
-      res.send('heroo');
-      // res.send(_.reduce(scoreboard, function (message, user) {
-      //   message += userRow(user) + '\n';
-      // }, ''));
+      res.send(JSON.stringify(scoreboard));
+      res.send(_.reduce(scoreboard, function (message, user) {
+        message += userRow(user) + '\n';
+      }, ''));
     });
   });
 
