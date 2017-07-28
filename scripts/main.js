@@ -73,7 +73,6 @@ module.exports = function (robot) {
     });
   });
 
-
   robot.hear(/what PRs need review/i, function (res) {
     authenticate();
 
