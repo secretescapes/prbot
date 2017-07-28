@@ -68,7 +68,7 @@ module.exports = function (robot) {
       {$unwind: '$people'},
       {$group: {_id: '$people.username', balance: {$sum: '$people.reward'}}},
       {$sort: {balance: -1}},
-      // {$project: {username: '$_id', balance: 'balance'}},
+      {$project: {username: '$_id', balance: '$balance'}},
     ]);
   };
 
