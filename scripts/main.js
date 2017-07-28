@@ -66,7 +66,8 @@ module.exports = function (robot) {
   let getSlackUsername = function (ghUsername, cb) {
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
     let promise = new Promise((resolve, reject) =>
-      robot.http(target).get((err, resp) => err ? reject(err) : resolve(resp)));
+      robot.http(target).get(
+        (err, _, body) => err ? reject(err) : resolve(body)));
 
     return promise;
   };
@@ -104,7 +105,7 @@ module.exports = function (robot) {
 
   let rewardReviewers = function (pullRequest, reviewers) {
     robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and '
-      + reviewers);
+      + JSON.stringify(reviewers));
 
     if (!reviewers) {
       return;
