@@ -1,6 +1,5 @@
 'use strict';
 
-
 // TODO Convert GitHub users to Slack users
 // TODO Show user how much money they have
 // TODO Calcuate dynamic reward value
@@ -10,9 +9,9 @@
 // TODO Print summary / leaderboard every Friday
 // TODO Print who is reviewing what in the list
 
+let bluebird = require('bluebird');
 let handlebars = require('handlebars');
 let GitHubApi = require('github');
-let bluebird = require('bluebird');
 let mongoose = require('mongoose');
 let _ = require('lodash');
 
@@ -31,20 +30,21 @@ let gh = new GitHubApi({
   timeout: 5000,
 });
 
-let tableRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
+let prRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
   '{{ user.login }}, reward: {{ reward }}]>');
+let userRow = handlebars.compile('{{ username }}: {{ balance }}');
 
 mongoose.connect(config.MONGODB_URI);
 
 let PersonSchema = new mongoose.Schema({
   reward: Number,
   role: String,
-  username: String
+  username: String,
 });
 let PullRequestSchema = new mongoose.Schema({
   number: Number,
   title: String,
-  people: [PersonSchema]
+  people: [PersonSchema],
 });
 
 let Person = mongoose.model('Person', PersonSchema);
@@ -59,75 +59,97 @@ module.exports = function (robot) {
     });
   };
 
-  let getReward = function(pr) {
+  let getReward = function (pr) {
     return 100;
   };
 
-  robot.hear(/scoreboard/i, function(res) {
-    let cursor = PullRequest.aggregate([
+  let getScoreboard = function () {
+    return PullRequest.aggregate([
       {$unwind: '$people'},
       {$group: {_id: '$people.username', balance: {$sum: '$people.reward'}}},
       {$sort: {balance: -1}},
-    ]).exec(function (_, scoreboard) {
-      res.send(JSON.stringify(scoreboard));
-    });
-  });
+    ]);
+  };
 
-  robot.hear(/what PRs need review/i, function (res) {
+  let getPullRequests = function (cb) {
     authenticate();
 
-    gh.pullRequests.getAll({
+    return gh.pullRequests.getAll({
       repo: config.REPO_NAME,
       owner: config.REPO_OWNER,
       state: 'open',
       per_page: 10, // TODO Pagination
-    }).then(function (resp) {
-      let output = '';
-      resp.data.forEach(function (pr) {
-        pr.reward = getReward(pr);
-        output += tableRow(pr) + '\n';
-      });
-      res.send(output);
+    });
+  };
+
+  let getReviews = function (prNumber) {
+    authenticate();
+
+    return gh.pullRequests.getReviews({
+      repo: config.REPO_NAME,
+      owner: config.REPO_OWNER,
+      number: prNumber,
+      per_page: 100, // TODO Pagination
+    });
+  };
+
+  let rewardReviewers = function (pullRequest, reviewers) {
+    robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and '
+      + reviewers);
+
+    let reward = getReward(pullRequest);
+    let pr = new PullRequest();
+    pr.number = pullRequest.number;
+    pr.title = pullRequest.title;
+    pr.people = _.map(reviewers, function (reviewer) {
+      return new Person({
+        username: reviewer,
+        reward: reward,
+        role: 'REVIEWER'});
+    });
+    pr.people.push(new Person({
+      username: pullRequest.user.login,
+      reward: -reward,
+      role: 'OWNER'})
+    );
+
+    pr.save();
+  };
+
+  robot.hear(/scoreboard/i, function (res) {
+    getScoreboard().exec(function (_, scoreboard) {
+      res.send(_.reduce(scoreboard, function (message, user) {
+        message += userRow(user) + '\n';
+      }, ''));
     });
   });
 
-  robot.router.post("/github-hook", function (req, res) {
+  robot.hear(/PRs need review/i, function (res) {
+    getPullRequests().then(function (resp) {
+      res.send(_.reduce(resp.data, function (message, pr) {
+        pr.reward = getReward(pr);
+        message += prRow(pr) + '\n';
+      }, ''));
+    });
+  });
+
+  robot.router.post('/github-hook', function (req, res) {
     let payload = req.body;
-    if (/*payload.organization != config.REPO_OWNER || */payload.repository.name != config.REPO_NAME) {
+    /* payload.organization != config.REPO_OWNER || */
+    if (payload.repository.name != config.REPO_NAME) {
       res.writeHead(400);
     } else {
       res.writeHead(202);
 
       if (payload.action === 'closed' && payload.pull_request.merged) {
-        robot.logger.debug("PR closed")
-        authenticate();
-
-
-        gh.pullRequests.getReviews({
-          repo: config.REPO_NAME,
-          owner: config.REPO_OWNER,
-          number: payload.pull_request.number,
-          per_page: 100, // TODO Pagination
-        }).then(resp => rewardReviewers(payload.pull_request, _.uniq(_.map(resp.data, 'user.login'))));
+        robot.logger.debug('PR closed');
+        getReviews(payload.pull_request.number)
+          .then((resp) => rewardReviewers(payload.pull_request,
+                _.uniq(_.map(resp.data, 'user.login'))));
       }
     }
     res.end();
   });
-
-  function rewardReviewers (pullRequest, reviewers) {
-    robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and ' + reviewers);
-    var reward = getReward(pullRequest);
-
-    let pr = new PullRequest();
-    pr.number = pullRequest.number;
-    pr.title = pullRequest.title;
-    pr.people = _.map(reviewers, function (reviewer) {
-      return new Person({username: reviewer, reward: reward, role: "REVIEWER"});
-    });
-    pr.people.push(new Person({username: pullRequest.user.login, reward: -reward, role: "OWNER"}));
-
-    pr.save();
-  }
 };
 
 
