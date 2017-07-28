@@ -119,19 +119,30 @@ module.exports = function (robot) {
 
   robot.hear(/scoreboard/i, function (res) {
     getScoreboard().exec(function (lol, scoreboard) {
-      let summary = _.reduce(scoreboard, function (message, user) {
-        message += userRow(user) + '\n';
-      }, '');
-      res.send(summary ? summary : 'Nobody is on the scoreboard yet!');
+      let summary;
+      if (scoreboard) {
+        summary = _.reduce(scoreboard, function (message, user) {
+          message += userRow(user) + '\n';
+        }, '');
+      } else {
+        summary = 'Nobody is on the scoreboard yet!';
+      }
+      res.send(summary);
     });
   });
 
   robot.hear(/PRs need review/i, function (res) {
     getPullRequests().then(function (resp) {
-      res.send(_.reduce(resp.data, function (message, pr) {
-        pr.reward = getReward(pr);
-        message += prRow(pr) + '\n';
-      }, ''));
+      let summary;
+      if (resp.data) {
+        summary = _.reduce(resp.data, function (message, pr) {
+          pr.reward = getReward(pr);
+          message += prRow(pr) + '\n';
+        }, '');
+      } else {
+        summary = 'No PRs need review currently.';
+      }
+      res.send(summary);
     });
   });
 
