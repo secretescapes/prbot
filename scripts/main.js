@@ -121,6 +121,7 @@ module.exports = function (robot) {
     getScoreboard().exec(function (lol, scoreboard) {
       let summary;
       if (scoreboard) {
+        res.send(JSON.stringify(scoreboard));
         summary = _.reduce(scoreboard, function (message, user) {
           return message + userRow(user) + '\n';
         }, '');
