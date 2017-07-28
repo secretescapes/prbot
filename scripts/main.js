@@ -118,11 +118,11 @@ module.exports = function (robot) {
   };
 
   robot.hear(/scoreboard/i, function (res) {
-    getScoreboard().exec(function (__, scoreboard) {
-      res.send(JSON.stringify(scoreboard));
-      res.send(_.reduce(scoreboard, function (message, user) {
+    getScoreboard().exec(function (lol, scoreboard) {
+      let summary = _.reduce(scoreboard, function (message, user) {
         message += userRow(user) + '\n';
-      }, ''));
+      }, '');
+      res.send(summary ? summary : 'Nobody is on the scoreboard yet!');
     });
   });
 
