@@ -68,7 +68,10 @@ module.exports = function (robot) {
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
     let promise = new Promise((resolve, reject) =>
       robot.http(target).get(
-        (err, _, body) => {
+        (err, __, body) => {
+          robot.logger.debug('blah');
+          robot.logger.debug(err);
+          robot.logger.debug(__);
           robot.logger.debug(body);
           return err ? reject(err) : resolve(body);
         } ));
