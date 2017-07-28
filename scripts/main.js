@@ -64,8 +64,12 @@ module.exports = function (robot) {
   };
 
   let getSlackUsername = function (ghUsername, cb) {
+    let promise = new Promise();
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
-    return bluebird.promisify(robot.http(target).get)();
+
+    robot.http(target).get((err, resp) => err ?
+      promise.reject(err) : promise.resolve(resp));
+    return promise;
   };
 
   let getScoreboard = function () {
