@@ -64,11 +64,10 @@ module.exports = function (robot) {
   };
 
   let getSlackUsername = function (ghUsername, cb) {
-    let promise = new Promise();
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
+    let promise = new Promise((resolve, reject) =>
+      robot.http(target).get((err, resp) => err ? reject(err) : resolve(resp)));
 
-    robot.http(target).get((err, resp) => err ?
-      promise.reject(err) : promise.resolve(resp));
     return promise;
   };
 
