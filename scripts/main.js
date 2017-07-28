@@ -175,9 +175,9 @@ module.exports = function (robot) {
         robot.logger.debug('PR closed');
 
         getReviews(payload.pull_request.number).then(
-          function (resp) {
-            let ghUsernames = _.uniq(_.map(resp.data, 'user.login'));
-            ghUsernames.unshift(payload.pullRequest.user.login);
+          function (reviewsResp) {
+            let ghUsernames = _.uniq(_.map(reviewsResp.data, 'user.login'));
+            ghUsernames.unshift(payload.pull_request.user.login);
 
             let lookupNamesInParallel = Promise.all(
               _.map(ghUsernames, (u) => getSlackUsername(u)));
