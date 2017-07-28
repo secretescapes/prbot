@@ -169,7 +169,7 @@ module.exports = function (robot) {
         getReviews(payload.pull_request.number).then(
           function (resp) {
             let ghUsernames = _.uniq(_.map(resp.data, 'user.login'));
-            let lookupNamesInParallel = bluebird.all(
+            let lookupNamesInParallel = Promise.all(
               _.map(ghUsernames, (u) => getSlackUsername(u)));
 
             lookupNamesInParallel.then((slackUsernames) =>
