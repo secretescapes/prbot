@@ -65,7 +65,7 @@ module.exports = function (robot) {
 
   let getSlackUsername = function (ghUsername, cb) {
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
-    return Promise.promisify(robot.http(target).get)();
+    return bluebird.promisify(robot.http(target).get)();
   };
 
   let getScoreboard = function () {
@@ -169,7 +169,7 @@ module.exports = function (robot) {
         getReviews(payload.pull_request.number).then(
           function (resp) {
             let ghUsernames = _.uniq(_.map(resp.data, 'user.login'));
-            let lookupNamesInParallel = Promise.all(
+            let lookupNamesInParallel = bluebird.all(
               _.map(ghUsernames, (u) => getSlackUsername(u)));
 
             lookupNamesInParallel.then((slackUsernames) =>
