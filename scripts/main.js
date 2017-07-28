@@ -69,7 +69,7 @@ module.exports = function (robot) {
     let promise = new Promise((resolve, reject) =>
       robot.http(target).get()((err, __, body) => {
         // HACK Extract just the username part
-        let name = JSON.parse(body).username.slice(0, -1).split('|')[1];
+        let name = JSON.parse(body)[0].username.slice(0, -1).split('|')[1];
         return err ? reject(err) : resolve(name);
       }));
 
