@@ -67,14 +67,11 @@ module.exports = function (robot) {
   let getSlackUsername = function (ghUsername, cb) {
     let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
     let promise = new Promise((resolve, reject) =>
-      robot.http(target).get()(
-        (err, __, body) => {
-          robot.logger.debug('blah');
-          robot.logger.debug(err);
-          robot.logger.debug(__);
-          robot.logger.debug(body);
-          return err ? reject(err) : resolve(body);
-        } ));
+      robot.http(target).get()((err, __, body) => {
+        // HACK Extract just the username part
+        let name = JSON.parse(body).username.slice(0, -1).split('|')[1];
+        return err ? reject(err) : resolve(name);
+      }));
 
     return promise;
   };
