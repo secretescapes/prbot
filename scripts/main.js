@@ -68,7 +68,7 @@ module.exports = function (robot) {
       {$unwind: '$people'},
       {$group: {_id: '$people.username', balance: {$sum: '$people.reward'}}},
       {$sort: {balance: -1}},
-      {$project: {username: '$_id', balance: 'balance'}},
+      // {$project: {username: '$_id', balance: 'balance'}},
     ]);
   };
 
@@ -118,7 +118,7 @@ module.exports = function (robot) {
   };
 
   robot.hear(/scoreboard/i, function (res) {
-    getScoreboard().exec(function (lol, scoreboard) {
+    getScoreboard().exec(function (__, scoreboard) {
       let summary;
       res.send('debug' + JSON.stringify(scoreboard));
       if (scoreboard) {
