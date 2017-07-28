@@ -5,7 +5,6 @@
 // TODO Calcuate dynamic reward value
 // TODO Allow reviewee to set additional bounty
 // TODO Make the regexes accept natural language
-// TODO Leaderboard
 // TODO Print summary / leaderboard every Friday
 // TODO Print who is reviewing what in the list
 
@@ -20,6 +19,7 @@ let config = {
   REPO_NAME: process.env.REPO_NAME,
   REPO_OWNER: process.env.REPO_OWNER,
   MONGODB_URI: process.env.MONGODB_URI,
+  NAME_SERVICE_URL: process.env.NAME_SERVICE_URL,
 };
 
 let gh = new GitHubApi({
@@ -63,6 +63,11 @@ module.exports = function (robot) {
     return 100;
   };
 
+  let getSlackUsername = function (ghUsername, cb) {
+    let target = `${config.NAME_SERVICE_URL}/user/reverse/${ghUsername}`;
+    return Promise.promisify(robot.http(target).get)();
+  };
+
   let getScoreboard = function () {
     return PullRequest.aggregate([
       {$unwind: '$people'},
@@ -98,6 +103,10 @@ module.exports = function (robot) {
     robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and '
       + reviewers);
 
+    if (!reviewers) {
+      return;
+    }
+
     let reward = getReward(pullRequest);
     let pr = new PullRequest();
     pr.number = pullRequest.number;
@@ -120,7 +129,6 @@ module.exports = function (robot) {
   robot.hear(/scoreboard/i, function (res) {
     getScoreboard().exec(function (__, scoreboard) {
       let summary;
-      res.send('debug' + JSON.stringify(scoreboard));
       if (scoreboard) {
         summary = _.reduce(scoreboard, function (message, user) {
           return message + userRow(user) + '\n';
@@ -157,9 +165,16 @@ module.exports = function (robot) {
 
       if (payload.action === 'closed' && payload.pull_request.merged) {
         robot.logger.debug('PR closed');
-        getReviews(payload.pull_request.number)
-          .then((resp) => rewardReviewers(payload.pull_request,
-                _.uniq(_.map(resp.data, 'user.login'))));
+
+        getReviews(payload.pull_request.number).then(
+          function (resp) {
+            let ghUsernames = _.uniq(_.map(resp.data, 'user.login'));
+            let lookupNamesInParallel = Promise.all(
+              _.map(ghUsernames, (u) => getSlackUsername(u)));
+
+            lookupNamesInParallel.then((slackUsernames) =>
+              rewardReviewers(payload.pull_request, slackUsernames));
+          });
       }
     }
     res.end();
