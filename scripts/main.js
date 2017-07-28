@@ -122,7 +122,7 @@ module.exports = function (robot) {
       let summary;
       if (scoreboard) {
         summary = _.reduce(scoreboard, function (message, user) {
-          message += userRow(user) + '\n';
+          return message + userRow(user) + '\n';
         }, '');
       } else {
         summary = 'Nobody is on the scoreboard yet!';
@@ -137,7 +137,7 @@ module.exports = function (robot) {
       if (resp.data) {
         summary = _.reduce(resp.data, function (message, pr) {
           pr.reward = getReward(pr);
-          message += prRow(pr) + '\n';
+          return message + prRow(pr) + '\n';
         }, '');
       } else {
         summary = 'No PRs need review currently.';
