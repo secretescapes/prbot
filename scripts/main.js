@@ -120,8 +120,8 @@ module.exports = function (robot) {
   robot.hear(/scoreboard/i, function (res) {
     getScoreboard().exec(function (lol, scoreboard) {
       let summary;
+      res.send('debug' + JSON.stringify(scoreboard));
       if (scoreboard) {
-        res.send(JSON.stringify(scoreboard));
         summary = _.reduce(scoreboard, function (message, user) {
           return message + userRow(user) + '\n';
         }, '');
