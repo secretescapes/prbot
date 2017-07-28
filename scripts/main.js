@@ -107,7 +107,7 @@ module.exports = function (robot) {
     });
   };
 
-  let rewardReviewers = function (pullRequest, reviewers) {
+  let rewardReviewers = function (pullRequest, owner, reviewers) {
     robot.logger.debug('rewardReviewers for ' + pullRequest.title + ' and '
       + JSON.stringify(reviewers));
 
@@ -126,7 +126,7 @@ module.exports = function (robot) {
         role: 'REVIEWER'});
     });
     pr.people.push(new Person({
-      username: pullRequest.user.login,
+      username: owner,
       reward: -reward,
       role: 'OWNER'})
     );
@@ -177,11 +177,13 @@ module.exports = function (robot) {
         getReviews(payload.pull_request.number).then(
           function (resp) {
             let ghUsernames = _.uniq(_.map(resp.data, 'user.login'));
+            ghUsername.unshift(pullRequest.user.login);
+
             let lookupNamesInParallel = Promise.all(
               _.map(ghUsernames, (u) => getSlackUsername(u)));
 
             lookupNamesInParallel.then((slackUsernames) =>
-              rewardReviewers(payload.pull_request, slackUsernames));
+              rewardReviewers(payload.pull_request, slackUsernames.shift(), slackUsernames));
           });
       }
     }
