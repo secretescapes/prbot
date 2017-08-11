@@ -267,7 +267,7 @@ module.exports = function (robot) {
     });
 
     console.log('pullRequest ' + JSON.stringify(pullRequest));
-    console.log('ownersPullRequests ' + JSON.stringify(ownersPullRequests));
+    console.log('ownersPullRequests ' + ownersPullRequests);
     console.log('tally ' + JSON.stringify(tally));
 
     // Step through each PR in sequence...
