@@ -1,7 +1,5 @@
 'use strict';
 
-
-// TODO Convert GitHub users to Slack users
 // TODO Show user how much money they have
 // TODO Calcuate dynamic reward value
 // TODO Allow reviewee to set additional bounty
@@ -61,6 +59,7 @@ module.exports = function (robot) {
   };
 
   let getReward = function (pr) {
+    console.log(pr);
     return 100;
   };
 

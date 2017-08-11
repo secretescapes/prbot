@@ -1,0 +1,56 @@
+10000
+
+
+total change = 1200
+deletions = 900
+additions = 300
+
+100 deletions
+1 addition
+
+100 additions
+100 deletion
+
+"probably a refactor"
+
+
+cost = min((additions) + (deletions * 0.5), ARBITRARY_LIMIT)
+cost = 5000
+
+200 lines of changes = nice
+500 = kind of the max
+1000 is nasty
+
+
+-4900
+5100
+
+100
+100
+100
+
+
++ 10000 - 0
+
+
+
+
+Good PR:
+
+Reward for doing any PR = 100
+
+* 200 - 500 lines (bonus +50)
+* 500 - 1000 lines (bonus +20)
+* Reviewed promptly (gives a bonus to the reviewers)
+
+
+
+
+
+
+
+
+
+
+
+
