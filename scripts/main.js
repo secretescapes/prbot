@@ -146,7 +146,7 @@ module.exports = function (robot) {
   };
 
   let giveAchievementIdempotent = function (person, achievementType) {
-    if (_.any(person.achievements, (a) => a.type === achievementType)) {
+    if (_.some(person.achievements, (a) => a.type === achievementType)) {
       return; // Already has the achievement
     }
 
@@ -271,7 +271,7 @@ module.exports = function (robot) {
       // and update the 'concurrent reviews count' for each reviewer
       _.each(tally, function (t) {
         if (!t.finished) {
-          let wasReviewer = _.any(oldPr.people, function (p) {
+          let wasReviewer = _.some(oldPr.people, function (p) {
             return p.username === t.username && p.role === 'REVIEWER';
           });
 
