@@ -196,9 +196,8 @@ module.exports = function (robot) {
         getReviews(payload.pull_request.number).then(
           function (reviewsResp) {
             let ghReviewers = extractUsernames(reviewsResp.data);
-
-            lookupNamesInParallel.then((slackUsernames) =>
-              rewardReviewers(payload.pull_request, payload.pull_request.user.login, ghReviewers));
+            rewardReviewers(payload.pull_request,
+                payload.pull_request.user.login, ghReviewers);
           });
       }
     }
