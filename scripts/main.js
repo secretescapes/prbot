@@ -30,7 +30,7 @@ let gh = new GitHubApi({
 });
 
 let prRow = handlebars.compile('<{{ html_url }}|{{ title }} [author: ' +
-  '{{ user.login }}, reward: {{ reward }}]>');
+  '{{ user.login }}]>');
 let userRow = handlebars.compile('{{ username }}: {{ balance }}');
 
 mongoose.connect(config.MONGODB_URI);
@@ -58,9 +58,13 @@ module.exports = function (robot) {
     });
   };
 
-  let getReward = function (pr) {
-    console.log(pr);
-    return 100;
+  let getReward = function (pr, owner, reviewer) {
+    let wasQuick = new Date(pr.merged_at) - new Date(pr.created_at) < 86400000;
+    let wasRequested = extractUsernames(pr.requested_reviewers).
+      includes(reviewer);
+    let wasBig = pr.additions + pr.deletions > 500;
+
+    return 100 + (wasQuick * 50) + (wasRequested * 20) - (wasBig * 60);
   };
 
   let getSlackUsername = function (ghUsername, cb) {
@@ -73,6 +77,10 @@ module.exports = function (robot) {
       }));
 
     return promise;
+  };
+
+  let extractUsernames = function (arr) {
+    return _.uniq(_.map(arr, 'user.login'));
   };
 
   let getScoreboard = function () {
@@ -114,21 +122,34 @@ module.exports = function (robot) {
       return;
     }
 
-    let reward = getReward(pullRequest);
     let pr = new PullRequest();
+
+    // let lookupNamesInParallel = Promise.all(
+    //   _.map(ghUsernames, (u) => getSlackUsername(u)));
+
     pr.number = pullRequest.number;
     pr.title = pullRequest.title;
+
+    // Give the rewards to all reviewers
+    let rewards = _.map(reviewers, function (reviewer) {
+      return getReward(pullRequest, owner, reviewer);
+    });
+
+    let i = 0;
     pr.people = _.map(reviewers, function (reviewer) {
+      i++;
       return new Person({
         username: reviewer,
-        reward: reward,
-        role: 'REVIEWER'});
+        reward: getReward(pullRequest, rewards[i], reviewer),
+        role: 'REVIEWER',
+      });
     });
+
     pr.people.push(new Person({
       username: owner,
-      reward: -reward,
-      role: 'OWNER'})
-    );
+      reward: -_.sum(rewards),
+      role: 'OWNER',
+    }));
 
     pr.save();
   };
@@ -152,7 +173,6 @@ module.exports = function (robot) {
       let summary;
       if (resp.data) {
         summary = _.reduce(resp.data, function (message, pr) {
-          pr.reward = getReward(pr);
           return message + prRow(pr) + '\n';
         }, '');
       } else {
@@ -175,14 +195,10 @@ module.exports = function (robot) {
 
         getReviews(payload.pull_request.number).then(
           function (reviewsResp) {
-            let ghUsernames = _.uniq(_.map(reviewsResp.data, 'user.login'));
-            ghUsernames.unshift(payload.pull_request.user.login);
-
-            let lookupNamesInParallel = Promise.all(
-              _.map(ghUsernames, (u) => getSlackUsername(u)));
+            let ghReviewers = extractUsernames(reviewsResp.data);
 
             lookupNamesInParallel.then((slackUsernames) =>
-              rewardReviewers(payload.pull_request, slackUsernames.shift(), slackUsernames));
+              rewardReviewers(payload.pull_request, payload.pull_request.user.login, ghReviewers));
           });
       }
     }
