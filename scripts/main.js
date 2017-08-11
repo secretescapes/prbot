@@ -266,6 +266,10 @@ module.exports = function (robot) {
       return {username: reviewer, score: 0, finished: false};
     });
 
+    console.log('pullRequest ' + JSON.stringify(pullRequest));
+    console.log('ownersPullRequests ' + JSON.stringify(ownersPullRequests));
+    console.log('tally ' + JSON.stringify(tally));
+
     // Step through each PR in sequence...
     _.each(ownersPullRequests, function (oldPr) {
       // and update the 'concurrent reviews count' for each reviewer
@@ -283,6 +287,8 @@ module.exports = function (robot) {
         }
       });
     });
+
+    console.log('tally after' + JSON.stringify(tally));
 
     _.each(tally, function (t) {
       if ([3, 5, 10].contains(t.score)) {
