@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "eslint": "^4.1.1",
-    "eslint-config-google": "^0.8.0"
+    "eslint-config-google": "^0.8.0",
+    "hubot-test-helper": "^1.6.0"
   }
 }
